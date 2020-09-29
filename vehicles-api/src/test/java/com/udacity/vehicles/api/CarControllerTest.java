@@ -88,6 +88,21 @@ public class CarControllerTest {
     }
 
     /**
+     * Test update function.
+    **/
+    @Test
+    public void updateCar() throws Exception {
+        Car car = getCar();
+        car.setPrice("2342342");
+
+        mvc.perform(post("/cars/1").content(json.write(car).getJson()).contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
+              .andDo(print()).andExpect(status().isOk()).andExpect(content().contentType(json.write(car).getJson()));
+    }
+
+
+
+
+    /**
      * Tests if the read operation appropriately returns a list of vehicles.
      * @throws Exception if the read operation of the vehicle list fails
      */
