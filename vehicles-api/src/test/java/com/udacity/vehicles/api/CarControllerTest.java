@@ -34,6 +34,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
 /**
  * Implements testing of the CarController class.
  */
@@ -96,7 +98,9 @@ public class CarControllerTest {
          *   the whole list of vehicles. This should utilize the car from `getCar()`
          *   below (the vehicle will be the first in the list).
          */
-
+        Car car = getCar();
+        mvc.perform(get("/cars")).andDo(print()).andExpect(status().isOk())
+                .andExpect(content().contentType(json.write(car).getJson()));
     }
 
     /**
@@ -109,6 +113,9 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
+        Car car = getCar();
+        mvc.perform(get("/cars/1")).andDo(print()).andExpect(status().isOk())
+                .andExpect(content().contentType(json.write(car).getJson()));
     }
 
     /**
@@ -122,6 +129,9 @@ public class CarControllerTest {
          *   when the `delete` method is called from the Car Controller. This
          *   should utilize the car from `getCar()` below.
          */
+        mvc.perform(delete("/cars/1")).andDo(print()).andExpect(status().isOk());
+        mvc.perform(get("/cars")).andDo(print()).andExpect(content().string("[]"));
+
     }
 
     /**

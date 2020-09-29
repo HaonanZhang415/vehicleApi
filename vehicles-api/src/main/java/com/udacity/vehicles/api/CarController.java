@@ -62,8 +62,10 @@ class CarController {
          * TODO: Use the `findById` method from the Car Service to get car information.
          * TODO: Use the `assembler` on that car and return the resulting output.
          *   Update the first line as part of the above implementing.
+         *   Done!
          */
-        return assembler.toResource(new Car());
+        Car retrievedCar = carService.findById(id);
+        return assembler.toResource(retrievedCar);
     }
 
     /**
@@ -78,8 +80,10 @@ class CarController {
          * TODO: Use the `save` method from the Car Service to save the input car.
          * TODO: Use the `assembler` on that saved car and return as part of the response.
          *   Update the first line as part of the above implementing.
+         *   Done!
          */
-        Resource<Car> resource = assembler.toResource(new Car());
+        Car savedCar = carService.save(car);
+        Resource<Car> resource = assembler.toResource(savedCar);
         return ResponseEntity.created(new URI(resource.getId().expand().getHref())).body(resource);
     }
 
@@ -96,8 +100,14 @@ class CarController {
          * TODO: Save the car using the `save` method from the Car service
          * TODO: Use the `assembler` on that updated car and return as part of the response.
          *   Update the first line as part of the above implementing.
+         *   Done!
          */
-        Resource<Car> resource = assembler.toResource(new Car());
+        if (id != null) {
+            car.setId(id);
+        }
+
+        Car savedCar = carService.save(car);
+        Resource<Car> resource = assembler.toResource(savedCar);
         return ResponseEntity.ok(resource);
     }
 
@@ -110,7 +120,9 @@ class CarController {
     ResponseEntity<?> delete(@PathVariable Long id) {
         /**
          * TODO: Use the Car Service to delete the requested vehicle.
+         *  Done!
          */
+        carService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

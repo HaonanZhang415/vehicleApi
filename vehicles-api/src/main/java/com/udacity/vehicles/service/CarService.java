@@ -1,9 +1,16 @@
 package com.udacity.vehicles.service;
 
+import com.udacity.vehicles.client.maps.Address;
+import com.udacity.vehicles.client.prices.Price;
+import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
 import java.util.List;
+
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Implements the car service create, read, update or delete
@@ -42,7 +49,10 @@ public class CarService {
          *   If it does not exist, throw a CarNotFoundException
          *   Remove the below code as part of your implementation.
          */
-        Car car = new Car();
+
+        Car car = repository.findById(id).orElseThrow(CarNotFoundException::new);
+
+        RestTemplate restTemplate = new RestTemplate();
 
         /**
          * TODO: Use the Pricing Web client you create in `VehiclesApiApplication`
@@ -51,7 +61,9 @@ public class CarService {
          * Note: The car class file uses @transient, meaning you will need to call
          *   the pricing service each time to get the price.
          */
-
+        //Price carPrice = restTemplate.getForObject("http://localhost:8082/services/price?vehicleId={vehicleId}", Price.class, id);
+        Price carPrice = restTemplate.getForObject("http://localhost:8082/prices/{vehicleId}", Price.class, id);
+        car.setPrice(carPrice.getPrice().toString());
 
         /**
          * TODO: Use the Maps Web client you create in `VehiclesApiApplication`
@@ -61,7 +73,17 @@ public class CarService {
          * Note: The Location class file also uses @transient for the address,
          * meaning the Maps service needs to be called each time for the address.
          */
+        Location carLocation = car.getLocation();
 
+
+        Address address = restTemplate.getForObject("http://localhost:9191/maps?lat={lat}&lon={lon}", Address.class, carLocation.getLat(), carLocation.getLon());
+        carLocation.setAddress(address.getAddress());
+        carLocation.setCity(address.getCity());
+        carLocation.setState(address.getState());
+        carLocation.setZip(address.getZip());
+        car.setLocation(carLocation);
+        car.setId(id);
+        save(car);
 
         return car;
     }
@@ -75,8 +97,10 @@ public class CarService {
         if (car.getId() != null) {
             return repository.findById(car.getId())
                     .map(carToBeUpdated -> {
+                        carToBeUpdated.setCondition(car.getCondition());
                         carToBeUpdated.setDetails(car.getDetails());
                         carToBeUpdated.setLocation(car.getLocation());
+                        carToBeUpdated.setPrice(car.getPrice());
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         }
@@ -93,12 +117,11 @@ public class CarService {
          * TODO: Find the car by ID from the `repository` if it exists.
          *   If it does not exist, throw a CarNotFoundException
          */
-
+        Car car = repository.findById(id).orElseThrow(CarNotFoundException::new);
 
         /**
          * TODO: Delete the car from the repository.
          */
-
-
+        repository.delete(car);
     }
 }
