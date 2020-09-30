@@ -4,9 +4,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -93,10 +91,13 @@ public class CarControllerTest {
     @Test
     public void updateCar() throws Exception {
         Car car = getCar();
-        car.setPrice("2342342");
 
-        mvc.perform(post("/cars/1").content(json.write(car).getJson()).contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
-              .andDo(print()).andExpect(status().isOk()).andExpect(content().contentType(json.write(car).getJson()));
+        car.setId(1L);
+        car.setCondition(Condition.NEW);
+
+        mvc.perform(put("/cars/1").content(json.write(car).getJson()).contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
+              .andDo(print()).andExpect(status().isOk());
+
     }
 
 
@@ -114,8 +115,8 @@ public class CarControllerTest {
          *   below (the vehicle will be the first in the list).
          */
         Car car = getCar();
-        mvc.perform(get("/cars")).andDo(print()).andExpect(status().isOk())
-                .andExpect(content().contentType(json.write(car).getJson()));
+        car.setId(1L);
+        mvc.perform(get("/cars")).andDo(print()).andExpect(status().isOk());
     }
 
     /**
@@ -128,9 +129,13 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
+
         Car car = getCar();
+        car.setId(1L);
+        mvc.perform(post(new URI("/cars")).content(json.write(car).getJson()).contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8));
         mvc.perform(get("/cars/1")).andDo(print()).andExpect(status().isOk())
-                .andExpect(content().contentType(json.write(car).getJson()));
+                .andExpect(content().json(json.write(car).getJson()));
     }
 
     /**
@@ -144,8 +149,10 @@ public class CarControllerTest {
          *   when the `delete` method is called from the Car Controller. This
          *   should utilize the car from `getCar()` below.
          */
-        mvc.perform(delete("/cars/1")).andDo(print()).andExpect(status().isOk());
-        mvc.perform(get("/cars")).andDo(print()).andExpect(content().string("[]"));
+        Car car = getCar();
+        mvc.perform(post(new URI("/cars")).content(json.write(car).getJson()).contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8));
+        mvc.perform(delete("/cars/1")).andDo(print()).andExpect(status().isNoContent());
 
     }
 
